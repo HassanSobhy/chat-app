@@ -1,6 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:chat_app/widgets/chat/messages.dart';
+import 'package:chat_app/widgets/chat/new_message.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 class ChatScreen extends StatelessWidget {
@@ -11,6 +11,7 @@ class ChatScreen extends StatelessWidget {
         title: Text("Chat"),
         actions: [
           DropdownButton(
+            underline: Container(),
             icon: Icon(
               Icons.more_vert,
               color: Theme.of(context).primaryIconTheme.color,
@@ -19,7 +20,10 @@ class ChatScreen extends StatelessWidget {
               DropdownMenuItem(
                 child: Row(
                   children: [
-                    Icon(Icons.exit_to_app,color: Colors.black,),
+                    Icon(
+                      Icons.exit_to_app,
+                      color: Colors.black,
+                    ),
                     SizedBox(
                       width: 4,
                     ),
@@ -30,45 +34,18 @@ class ChatScreen extends StatelessWidget {
               )
             ],
             onChanged: (itemIdentifir) async {
-              if(itemIdentifir=='logout'){
+              if (itemIdentifir == 'logout') {
                 await FirebaseAuth.instance.signOut();
               }
             },
           )
         ],
       ),
-      body: StreamBuilder(
-        stream: FirebaseFirestore.instance
-            .collection("chats/ezj4JT6YPmRHRb9kIMjg/messages")
-            .snapshots(),
-        builder: (context, snapShot) {
-          if (snapShot.connectionState == ConnectionState.waiting) {
-            return buildIsLoading();
-          } else {
-            final docs = snapShot.data.docs;
-            return ListView.builder(
-                itemCount: docs.length,
-                itemBuilder: (context, index) => Container(
-                      padding: EdgeInsets.all(8),
-                      child: Text(docs[index]['text']),
-                    ));
-          }
-        },
+      body: Container(
+        child: Column(
+          children: [Expanded(child: Messages()),NewMessages()],
+        ),
       ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () {
-          FirebaseFirestore.instance
-              .collection("/chats/ezj4JT6YPmRHRb9kIMjg/messages")
-              .add(Map());
-        },
-      ),
-    );
-  }
-
-  Widget buildIsLoading() {
-    return Center(
-      child: CircularProgressIndicator(),
     );
   }
 }

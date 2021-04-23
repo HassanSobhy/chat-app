@@ -1,4 +1,10 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import '../pickers/user_image_picker.dart';
+
 
 class AuthForm extends StatefulWidget {
   final bool _isLoading;
@@ -7,6 +13,7 @@ class AuthForm extends StatefulWidget {
     String email,
     String password,
     String username,
+    File image,
     bool isLogin,
   ) _submitFnc;
 
@@ -22,6 +29,7 @@ class _AuthFormState extends State<AuthForm> {
   String _email = "";
   String _password = "";
   String _username = "";
+  File _userImageFile;
 
   @override
   Widget build(BuildContext context) {
@@ -29,11 +37,13 @@ class _AuthFormState extends State<AuthForm> {
       child: Card(
         margin: EdgeInsets.all(20),
         child: SingleChildScrollView(
+          padding: EdgeInsets.all(16),
           child: Form(
             key: _formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                if(!_isLogin) UserImagePicker(_pickedImage),
                 buildEmailField(),
                 if (!_isLogin) buildUserNameField(),
                 buildPasswordField(),
@@ -107,13 +117,31 @@ class _AuthFormState extends State<AuthForm> {
 
 ///////////Helper Method//////////////
 
+
+  void _pickedImage(File pickedImage){
+    _userImageFile = pickedImage;
+  }
+
   void _submit() {
     bool _isValid = _formKey.currentState.validate();
     FocusScope.of(context).unfocus();
+
+    if(!_isLogin &&_userImageFile ==null){
+      buildSnackBar();
+      return;
+    }
+
     if (_isValid) {
       _formKey.currentState.save();
-      widget._submitFnc(context, _email, _password, _username, _isLogin);
+      widget._submitFnc(context, _email, _password, _username,_userImageFile, _isLogin);
     }
+  }
+
+  void buildSnackBar() {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text("Please pick an image"),
+      backgroundColor: Theme.of(context).errorColor,
+    ));
   }
 
   String validatePassword(val) {
